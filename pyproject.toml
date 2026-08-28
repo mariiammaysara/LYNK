@@ -1,0 +1,113 @@
+[project]
+name = "rel-mcp"
+version = "0.1.0"
+description = "Meeting and relationship intelligence agent for SIM Express — reads calendar and mail, writes briefs to Telegram."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # ≥2.7 for use_attribute_docstrings — field docstrings become schema descriptions,
+    # so per-field notes travel with the MCP tool schemas.
+    "pydantic>=2.7",
+    "pydantic-settings>=2.5",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    # Windows ships no IANA tz database; Asia/Riyadh conversion is load-bearing.
+    "tzdata>=2025.1",
+    # Google APIs — used from P2 onward.
+    "google-auth>=2.35",
+    "google-auth-oauthlib>=1.2",
+    "google-api-python-client>=2.150",
+    # MCP server — used from P7 onward.
+    "mcp>=1.9",
+    # Telegram delivery (used by the cron script from P10).
+    "httpx>=0.28",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "types-pyyaml>=6.0",
+    "respx>=0.22",
+    # Local-only webhook receiver for manual Meeting BaaS testing (P21) —
+    # not part of the production path, so dev-only rather than a real dep.
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rel_mcp"]
+
+# ── pytest ────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+# ── ruff ──────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # bugbear
+    "A",        # builtins shadowing
+    "C4",       # comprehensions
+    "SIM",      # simplify
+    "TID",      # tidy imports
+    "RUF",      # ruff-specific
+]
+
+ignore = [
+    # The deliverable is Arabic. RUF001-003 catch Latin homoglyph tricks and
+    # here fire on every alef and Arabic comma in the product's own output.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+# Scripts reconfigure stdout/stderr to UTF-8 before any other import so
+# Arabic prints on Windows consoles — that's a legitimate reason for
+# E402 that ruff can't distinguish from the general "imports at top" rule.
+"scripts/*" = ["E402"]
+
+# ── mypy ──────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+disallow_any_generics = true
+show_error_codes = true
+mypy_path = "src"
+
+# Google API clients ship no type stubs. Untyped-call warnings in modules
+# that touch them are unavoidable and don't reflect real type risk.
+[[tool.mypy.overrides]]
+module = [
+    "google.*",
+    "google_auth_oauthlib.*",
+    "googleapiclient.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["rel_mcp.google.*"]
+disallow_untyped_calls = false

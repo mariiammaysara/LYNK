@@ -1,0 +1,33 @@
+# اسرار — ممنوع كوميت
+.env
+secrets.txt
+credentials.json
+token.json
+*.pem
+*.key
+
+# حالة وقت التشغيل — بتتراكم على الجهاز مش فى الريبو
+var/
+*.db
+*.jsonl
+
+# بيئة بايثون
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# محرر
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
