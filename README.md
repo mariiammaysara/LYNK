@@ -806,6 +806,15 @@ Hermes provides the model, orchestration, Telegram, scheduling, and approval lay
 
 ---
 
+## Contributing
+
+LYNK is built to grow.
+
+Contributions, ideas, improvements, and bug fixes are welcome.  
+If you see something that could make LYNK more useful, feel free to open an
+issue or submit a pull request.
+
+---
 For implementation details and the reasoning behind the deterministic rules, confirmation handling, environment contract, and testing decisions, see [`README.dev.md`](./README.dev.md).
 
 ---
